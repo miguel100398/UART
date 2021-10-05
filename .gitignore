@@ -50,3 +50,22 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+*.docx
+
+#quartus files
+/db/
+/output_files/
+/incremental_db/
+*.bak
+*.txt
+*.qar 
+*.qarlog
+*.qws
+*.zip
+#Modelsim files
+/simulation/
+*.rpt
+#quartus project
+*.qpf
+*.qsf
