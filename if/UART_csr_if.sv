@@ -1,4 +1,4 @@
-interface UART_regs_if;
+interface UART_csr_if;
 import UART_pkg::*;
 
 //Registers
@@ -30,4 +30,4 @@ modport uart_mp(
     output free;
 );
 
-endinterface: UART_regs_if
+endinterface: UART_csr_if

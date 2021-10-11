@@ -21,7 +21,7 @@ import UART_pkg::*;
     input  logic           busy,
     input  logic           free,
     //CSR interface to UART sub modules
-    UART_regs_if.csr_mp    regs
+    UART_csr_if.csr_mp    regs
 );
 
 //Registers
