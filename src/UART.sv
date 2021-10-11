@@ -1,1 +1,3 @@
-module UART
+module UART;
+
+endmodule: UART

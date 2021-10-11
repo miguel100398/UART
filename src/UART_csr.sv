@@ -16,10 +16,6 @@ import UART_pkg::*;
     input  uart_csr_addr_t rd_addr,
     output uart_csr_data_t rd_data,
     input  logic           ren,
-    //Write flags
-    input  logic           parity_error,
-    input  logic           busy,
-    input  logic           free,
     //CSR interface to UART sub modules
     UART_csr_if.csr_mp    regs
 );
@@ -43,7 +39,7 @@ assign regs.uart_status_0_csr  = uart_status_0_csr;
 
 //Write enables
 assign write_uart_baud_rate_csr = wen && (wr_addr == UART_BAUD_RATE_CSR_ADDR);
-assign write_uart_control_0_csr = wen && (wr_addr == UART_CONTROl_0_CSR_ADDR);
+assign write_uart_control_0_csr = wen && (wr_addr == UART_CONTROL_0_CSR_ADDR);
 //Read clean
 assign read_uart_status_0_csr  = ren && (rd_addr == UART_STATUS_0_CSR_ADDR);
 
@@ -67,9 +63,10 @@ end
 //Error in data bits
 assign data_bit_error = (uart_control_0_csr.data_bits < 5) || (uart_control_0_csr.data_bits > 8);
 
-//Status register
+//Quartus will infer latches for dont_care bits as they are never written,
+//These latches are expected
 always_ff @(posedge clk or negedge rst_n) begin
-    if (rst_n) begin
+    if (~rst_n) begin
         uart_status_0_csr <= UART_STATUS_0_CSR_RST;
     end else if (read_uart_status_0_csr) begin      //clean bits with read
         uart_status_0_csr.data_bits_error <= UART_NO_ERROR;
@@ -85,7 +82,7 @@ always_ff @(posedge clk or negedge rst_n) begin
         if (regs.busy) begin
             uart_status_0_csr.busy            <= UART_BUSY;    
         end else if (regs.free) begin
-            uart_status_0_csr.free            <= UART_FREE;
+            uart_status_0_csr.busy            <= UART_FREE;
         end
     end
 end
@@ -102,7 +99,7 @@ always_ff @(posedge clk or negedge rst_n) begin
             UART_CONTROL_0_CSR_ADDR: begin
                 rd_data <= uart_control_0_csr;
             end
-            UART_STATUS_0_CSR_ADDT: begin
+            UART_STATUS_0_CSR_ADDR: begin
                 rd_data <= uart_status_0_csr;
             end
             default: begin
