@@ -17,7 +17,10 @@ import UART_csr_pkg::*;
     output uart_csr_data_t rd_data,
     input  logic           ren,
     //CSR interface to UART sub modules
-    UART_csr_if.csr_mp    regs
+    UART_csr_if.csr_mp    csr,
+    //Status flags
+    input logic           parity_error,
+    input uart_busy_e     busy
 );
 
 //Registers
@@ -33,9 +36,9 @@ logic read_uart_status_0_csr;
 logic data_bit_error;
 
 //Assign registers to interfaces
-assign regs.uart_baud_rate_csr = uart_baud_rate_csr;
-assign regs.uart_control_0_csr = uart_control_0_csr;
-assign regs.uart_status_0_csr  = uart_status_0_csr;
+assign csr.uart_baud_rate_csr = uart_baud_rate_csr;
+assign csr.uart_control_0_csr = uart_control_0_csr;
+assign csr.uart_status_0_csr  = uart_status_0_csr;
 
 //Write enables
 assign write_uart_baud_rate_csr = wen && (wr_addr == UART_BAUD_RATE_CSR_ADDR);
@@ -76,14 +79,10 @@ always_ff @(posedge clk or negedge rst_n) begin
         if (data_bit_error) begin
             uart_status_0_csr.data_bits_error <= UART_ERROR;
         end
-        if (regs.parity_error) begin
+        if (parity_error) begin
             uart_status_0_csr.parity_error    <= UART_ERROR;
         end
-        if (regs.busy) begin
-            uart_status_0_csr.busy            <= UART_BUSY;    
-        end else if (regs.free) begin
-            uart_status_0_csr.busy            <= UART_FREE;
-        end
+        uart_status_0_csr.busy                <= busy;
     end
 end
 

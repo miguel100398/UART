@@ -8,5 +8,6 @@ package UART_pkg;
 
 import UART_csr_pkg::*;
 
+typedef logic[7:0] uart_data_t;
 
 endpackage: UART_pkg
