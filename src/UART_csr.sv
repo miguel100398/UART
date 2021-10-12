@@ -5,7 +5,7 @@
 
 
 module UART_csr
-import UART_pkg::*;
+import UART_csr_pkg::*;
 (
     //CSR interface to exterior
     input  logic           clk,

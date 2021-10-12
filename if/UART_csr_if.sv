@@ -1,5 +1,5 @@
 interface UART_csr_if;
-import UART_pkg::*;
+import UART_csr_pkg::*;
 
 //Registers
 uart_baud_rate_csr_t uart_baud_rate_csr;

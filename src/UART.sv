@@ -1,5 +1,6 @@
 module UART
-import UART_pkg::*;
+import UART_csr_pkg::*,
+		 UART_pkg::*;
 (
     //Clock and resets
     input  logic           clk,
@@ -11,6 +12,8 @@ import UART_pkg::*;
     input  uart_csr_addr_t csr_rd_addr,
     input  logic           csr_ren,
     output uart_csr_data_t csr_rd_data
+    //UART Internal interface
+    
 );
 
     //CSR interface
