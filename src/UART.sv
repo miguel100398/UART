@@ -25,6 +25,7 @@ import UART_pkg::*,
     output logic           tx_data_ready,
     output uart_data_t     rx_data,
     output logic           rx_data_valid,
+    input  logic           rx_data_ready,
     //UART external interface
     output logic           tx,
     input  logic           rx
@@ -72,6 +73,7 @@ import UART_pkg::*,
         .rst_n(rst_n),
         .rx_data(rx_data),
         .rx_data_valid(rx_data_valid),
+        .rx_data_ready(rx_data_ready),
         .rx(rx),
         .csr(csr_if.uart_mp),
         .parity_error(uart_parity_error_f)

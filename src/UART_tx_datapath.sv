@@ -2,6 +2,7 @@ module UART_tx_datapath
 import UART_pkg::*;
 (
     input  logic        clk,
+    input  logic        rst_n,
     input  logic        start_bits,
     input  logic        shift_bits,
     input  logic        wait_bit_en,
@@ -26,7 +27,7 @@ shift_register#(
     .WIDTH(11)          //{start_bit,data_bits[7:0], parity_bit, stop_bit}
 ) shft_reg(
     .clk(clk),
-    .rst_n(1'b1),
+    .rst_n(rst_n),
     .data_in_p(load_shift_reg_data),
     .data_in_s(1'b1),
     .load(start_bits),
@@ -38,7 +39,7 @@ shift_register#(
 timer#(
     .HALF_PULSE(1'b0),
     .WIDTH(32)
-)(
+) wait_bit_timer(
     .clk(clk),
     .rst_n(wait_bit_rst_n),
     .count(csr.uart_baud_rate_csr),

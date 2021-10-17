@@ -38,6 +38,7 @@ UART_tx_fsm fsm(
 //Data path
 UART_tx_datapath datapath(
     .clk(clk),
+    .rst_n(rst_n),
     .start_bits(start_bits),
     .shift_bits(shift_bits),
     .wait_bit_en(wait_bit_en),
