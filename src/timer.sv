@@ -6,7 +6,7 @@ module timer#(
     input  logic            rst_n,
     input  logic[WIDTH-1:0] count,
     input  logic            en,
-    output logic            half_trigger,
+    output logic            half_trigger,   //Can´t remove port with parameter, will be removed in synthesis by quartus
     output logic            trigger
 );
 
