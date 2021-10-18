@@ -24,7 +24,7 @@ logic even_parity;
 //Shift register
 
 shift_register#(
-    .SHIFT_LEFT(1'b1),
+    .SHIFT_LEFT(1'b0),
     .WIDTH(11),          //{start_bit,data_bits[7:0], parity_bit, stop_bit},
     .RST_VAL(11'b111_1111_1111)
 ) shft_reg(
@@ -58,23 +58,27 @@ always_comb begin
     case (csr.uart_control_0_csr.data_bits)
         4'd5: begin
             even_parity          = ^tx_data[4:0];
-            load_shift_reg_data = {UART_START_BIT, tx_data[4:0], parity_bit_stop, UART_STOP_BIT, 3'b111};
+            //load_shift_reg_data = {UART_START_BIT, tx_data[4:0], parity_bit_stop, UART_STOP_BIT, 3'b111};
+            load_shift_reg_data = {3'b111, UART_STOP_BIT, parity_bit_stop, tx_data[4:0], UART_START_BIT};
         end
         4'd6: begin
             even_parity          = ^tx_data[5:0];
-            load_shift_reg_data = {UART_START_BIT, tx_data[5:0], parity_bit_stop, UART_STOP_BIT, 2'b11};
+            //load_shift_reg_data = {UART_START_BIT, tx_data[5:0], parity_bit_stop, UART_STOP_BIT, 2'b11};
+            load_shift_reg_data = {2'b1, UART_STOP_BIT, parity_bit_stop, tx_data[5:0], UART_START_BIT};
         end
         4'd7: begin
             even_parity          = ^tx_data[6:0];
-            load_shift_reg_data = {UART_START_BIT, tx_data[6:0], parity_bit_stop, UART_STOP_BIT, 1'b1};
+            //load_shift_reg_data = {UART_START_BIT, tx_data[6:0], parity_bit_stop, UART_STOP_BIT, 1'b1};
+            load_shift_reg_data = {1'b1, UART_STOP_BIT, parity_bit_stop, tx_data[6:0], UART_START_BIT};
         end
         4'd8: begin
             even_parity          = ^tx_data[7:0];
-            load_shift_reg_data = {UART_START_BIT, tx_data[7:0], parity_bit_stop, UART_STOP_BIT};
+            //load_shift_reg_data = {UART_START_BIT, tx_data[7:0], parity_bit_stop, UART_STOP_BIT};
+            load_shift_reg_data = {UART_STOP_BIT, parity_bit_stop, tx_data[7:0], UART_START_BIT};
         end
         default: begin
             even_parity = 1'b0;
-			load_shift_reg_data = 11'd0;
+			load_shift_reg_data = 11'b111_1111_1111;
         end
     endcase
 end

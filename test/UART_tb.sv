@@ -47,11 +47,11 @@ module UART_tb;
         .csr_ren(csr_ren),
         .csr_rd_data(csr_rd_data),
         .tx_data(tx_data),
-        .send(send),
+        .tx_send(send),
         .tx_data_ready(tx_data_ready),
         .rx_data(rx_data),
-        .rx_data_valid(rx_data_valid),
-        .rx_data_ready(rx_data_ready),
+        .rx_flag(rx_data_valid),
+        .rx_flag_clr(rx_data_ready),
         .tx(tx),
         .rx(rx)
     );
@@ -140,7 +140,7 @@ module UART_tb;
         @(cb);
         cb.rx <= UART_START_BIT;
         wait_bit_time();
-        for (int i=data_bits-1; i>=0; i--) begin
+        for (int i=0; i<data_bits; i++) begin
             cb.rx <= data[i];
             wait_bit_time();
         end
@@ -161,7 +161,7 @@ module UART_tb;
         wait(~cb.tx);
         data = 0;
         wait_bit_time();
-        for (int i=data_bits-1; i>=0; i--) begin
+        for (int i=0; i<data_bits; i++) begin
             wait_half_bit_time();
             data[i] <= cb.tx;
             wait_half_bit_time();

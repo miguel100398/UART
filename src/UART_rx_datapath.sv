@@ -54,7 +54,7 @@ timer#(
 
 //Shift register
 shift_register#(
-    .SHIFT_LEFT(1'b1),
+    .SHIFT_LEFT(1'b0),
     .WIDTH(9)          //{data_bits[7:0] parity_bit}
 ) shft_reg(
     .clk(clk),
@@ -66,7 +66,7 @@ shift_register#(
     .data_out_p(shift_reg)
 );
 
-assign shift_reg_no_parity = (csr.uart_control_0_csr.parity_bit) ? shift_reg[8:1] : shift_reg[7:0];
+assign shift_reg_no_parity = (csr.uart_control_0_csr.parity_bit) ? shift_reg[7:0] : shift_reg[8:1];
 
 //Data out
 always_ff @(posedge clk or negedge rst_n) begin
@@ -76,7 +76,7 @@ always_ff @(posedge clk or negedge rst_n) begin
         check_odd    <= 1'b0;
         rx_data      <= 8'd0;
     end else if (done) begin
-        parity       <= shift_reg[0];
+        parity       <= shift_reg[8];
         check_parity <= csr.uart_control_0_csr.parity_bit;
         check_odd    <= csr.uart_control_0_csr.odd_parity;
         case(csr.uart_control_0_csr.data_bits)

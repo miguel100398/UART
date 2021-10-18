@@ -21,6 +21,12 @@ always_comb begin
         8'd68: display = 4'hD;
         8'd69: display = 4'hE;
         8'd70: display = 4'hF;
+        8'd97: display = 4'hA;
+        8'd98: display = 4'hB;
+        8'd99: display = 4'hC;
+        8'd100: display = 4'hD;
+        8'd101: display = 4'hE;
+        8'd102: display = 4'hF;
         default: display = 4'h0;
     endcase
 end
