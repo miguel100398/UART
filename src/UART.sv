@@ -21,15 +21,15 @@ import UART_pkg::*,
     output uart_csr_data_t csr_rd_data,
     //UART Internal interface
     input  uart_data_t     tx_data,
-    input  logic           send,
+    input  logic           tx_send,
     output logic           tx_data_ready,
     output uart_data_t     rx_data,
-    output logic           rx_data_valid,
-    input  logic           rx_data_ready,
+    output logic           rx_flag,           //rx_data_valid
+    input  logic           rx_flag_clr,       //rx_data_ready
     //UART external interface
     output logic           tx,
-    input  logic           rx
-    
+    input  logic           rx,
+    output logic           parity_error
 );
 
 //CSR interface
@@ -38,6 +38,8 @@ import UART_pkg::*,
     //Status flags
     uart_busy_e uart_busy_f;
     logic uart_parity_error_f;
+
+    assign parity_error = csr_if.uart_status_0_csr.parity_error;
 	
 	//CSR
     UART_csr csr(
@@ -59,7 +61,7 @@ import UART_pkg::*,
         .clk(clk),
         .rst_n(rst_n),
         .tx_data(tx_data),
-        .send(send),
+        .send(tx_send),
         .tx_data_ready(tx_data_ready),
         .tx(tx),
         .csr(csr_if.uart_mp),
@@ -72,8 +74,8 @@ import UART_pkg::*,
         .clk(clk),
         .rst_n(rst_n),
         .rx_data(rx_data),
-        .rx_data_valid(rx_data_valid),
-        .rx_data_ready(rx_data_ready),
+        .rx_data_valid(rx_flag),
+        .rx_data_ready(rx_flag_clr),
         .rx(rx),
         .csr(csr_if.uart_mp),
         .parity_error(uart_parity_error_f)

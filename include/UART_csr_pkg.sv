@@ -42,7 +42,7 @@ parameter uart_csr_addr_t UART_BAUD_RATE_CSR_ADDR = 'h0;
 parameter uart_csr_addr_t UART_CONTROL_0_CSR_ADDR = 'h1;
 parameter uart_csr_addr_t UART_STATUS_0_CSR_ADDR  = 'h2;
 //Reset values
-parameter uart_csr_data_t UART_BAUD_RATE_CSR_RST = 'd9600;
+parameter uart_csr_data_t UART_BAUD_RATE_CSR_RST = 'd5208;      //9600 Baud rate
 //Dont care bits/Data bits/od_parity/parity_bit
 //XXXXXXXXXXXXXX/   8     /  ODD    / PARITY
 parameter uart_csr_data_t UART_CONTROL_0_CSR_RST = {{UART_CONTROL_0_CSR_DONT_CARE_BITS{1'b0}}, 4'd8, UART_ODD_PARITY, UART_PARITY}; 
