@@ -11,13 +11,16 @@ module timer#(
 );
 
 logic[WIDTH-1:0] cntr;
+logic[WIDTH-1:0] next_cntr;
+
+assign next_cntr = cntr + 1'b1;
 
 //Trigger
-assign trigger = (cntr === count);
+assign trigger = (next_cntr === count);
 //half trigger
 generate
     if (HALF_PULSE) begin: gen_half_trigger
-        assign half_trigger = (cntr == (count>>2));
+        assign half_trigger = (next_cntr == (count>>1));
     end
     //Else
     //Unused outputs will be removed by quartus in synthesis
@@ -31,7 +34,7 @@ always_ff @(posedge clk or negedge rst_n) begin
         if (trigger) begin
             cntr <= {WIDTH{1'b0}};
         end else begin
-            cntr <= cntr + 1'b1;
+            cntr <= next_cntr;
         end
     end
 end

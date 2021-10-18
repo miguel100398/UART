@@ -96,8 +96,8 @@ always_ff @(posedge clk or negedge rst_n) begin
     end 
 end
 
-assign odd_parity  = ^rx_data;
-assign even_parity = ~odd_parity;
+assign even_parity  = ^rx_data;
+assign odd_parity  = ~even_parity;
 
 //Parity_error
 always_comb begin

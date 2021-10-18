@@ -39,10 +39,7 @@ end
 always_comb begin
     case (state)
         IDLE_S: begin
-            next_state = (~rx) ? START_S : IDLE_S;    
-        end
-        START_S: begin
-            next_state = WAIT_BIT_S;
+            next_state = (~rx) ? WAIT_BIT_S : IDLE_S;    
         end
         WAIT_BIT_S: begin
             if (wait_bit_done) begin
@@ -59,7 +56,7 @@ always_comb begin
             next_state = WAIT_BIT_S;
         end
         DONE_S: begin
-            next_state = (~rx) ? START_S : IDLE_S;
+            next_state = (~rx) ? WAIT_BIT_S : IDLE_S;
         end
         default: begin
             next_state = IDLE_S;
@@ -71,14 +68,6 @@ end
 always_comb begin
     case(state)
         IDLE_S: begin
-            bits_sent_rst_n   = 1'b0;
-            bits_sent_en      = 1'b0;
-            shift_bits        = 1'b0;
-            wait_bit_en       = 1'b0;
-            wait_bit_rst_n    = 1'b0;
-            done              = 1'b0;
-        end
-        START_S: begin
             bits_sent_rst_n   = 1'b0;
             bits_sent_en      = 1'b0;
             shift_bits        = 1'b0;
@@ -134,6 +123,6 @@ end
 assign use_parity_bit = (csr.uart_control_0_csr.parity_bit == UART_PARITY);
 assign all_bits_sent  = (bits_sent == (csr.uart_control_0_csr.data_bits + use_parity_bit + 1'b1)); //{data bits + parity_bit + stop_bit} //Start bit resets counter
 
-assign valid_shift = (bits_sent < (csr.uart_control_0_csr.data_bits + use_parity_bit));
+assign valid_shift = (bits_sent <= (csr.uart_control_0_csr.data_bits + use_parity_bit));
 
 endmodule: UART_rx_fsm

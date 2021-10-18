@@ -24,10 +24,10 @@ module UART_tb;
     logic           rx;
 
     //parameters to configure csr
-    localparam data_bits  = 8;
-    localparam parity_bit = 1;
-    localparam odd_parity = 1;
-    localparam baud_rate  = 20;
+    localparam logic [3:0] data_bits  = 8;
+    localparam logic parity_bit = 1;
+    localparam logic odd_parity = 1;
+    localparam logic [31:0] baud_rate  = 20;
 
     int pass_vectors = 0;
     int fail_vectors = 0;
@@ -110,7 +110,7 @@ module UART_tb;
     //Configure UART
     task configure_UART();
         @(cb);
-        write_csr(UART_BAUD_RATE_CSR_ADDR, baud_rate);
+        write_csr(UART_BAUD_RATE_CSR_ADDR, baud_rate-1);
         write_csr(UART_CONTROL_0_CSR_ADDR, {26'b0, data_bits, odd_parity, parity_bit});
         @(cb);
     endtask: configure_UART
@@ -146,9 +146,9 @@ module UART_tb;
         end
         if (parity_bit) begin
             if (odd_parity) begin
-                cb.rx <= ^data_bits;
+                cb.rx <= ~(^data);
             end else begin
-                cb.rx <= ~(^data_bits);
+                cb.rx <= (^data);
             end
             wait_bit_time();
         end
@@ -159,6 +159,7 @@ module UART_tb;
     //Receive data from UART
     task receive_uart_data(output uart_data_t data, output logic parity);
         wait(~cb.tx);
+        data = 0;
         wait_bit_time();
         for (int i=data_bits-1; i>=0; i--) begin
             wait_half_bit_time();
@@ -178,7 +179,8 @@ module UART_tb;
         @(cb);
         cb.rx_data_ready <= 1'b1;
         wait(cb.rx_data_valid);
-        data <= cb.rx_data;
+        @(cb);
+        data = cb.rx_data;
         cb.rx_data_ready <= 1'b0;
     endtask: get_fpga_data
 
@@ -188,7 +190,7 @@ module UART_tb;
         fork
             begin
                 forever begin
-                    data = $random();
+                    data = $urandom()%(2**data_bits);
                     loop_back_data.push_back(data);
                     send_fpga_data(data);
                 end
@@ -205,7 +207,9 @@ module UART_tb;
                 forever begin
                     receive_uart_data(data, parity);
                     check_parity(data, parity);
-                    send_uart_data(data);
+                    fork
+                        send_uart_data(data);
+                    join_none
                 end
             end
         join_none
@@ -224,6 +228,7 @@ module UART_tb;
                        pass();
                    end else begin
                        $error($sformatf("Error in loopback data, expected: %0b, actual: %0b", exp_data, actual_data));
+                       fail();
                    end
                end 
             end
@@ -233,7 +238,12 @@ module UART_tb;
     //Test
     task test();
         $display("Starting test");
-        cb.rst_n <= 1'b0;
+        cb.rst_n         <= 1'b0;
+        cb.rx            <= 1'b1;
+        cb.send          <= 1'b0;
+        cb.tx_data       <= 0;
+        cb.rx_data_ready <= 1'b1;
+        @(cb);
         @(cb);
         cb.rst_n <= 1'b1;
         //Configure UART
@@ -241,7 +251,7 @@ module UART_tb;
         send_rand_fpga_data();
         send_loopback_uart_data();
         check_loopback();
-        wait(1000);
+        repeat(10000) @(cb);
         $display("finishing test");
         if (fail_vectors != 0) begin
             $fatal($sformatf("Test fail, num_errors: %0d, num_pass: %0d, num_vectos: %0d", fail_vectors, pass_vectors, run_vectors));
@@ -258,17 +268,17 @@ module UART_tb;
     function void check_parity(uart_data_t data, logic parity);
         if (parity_bit) begin
            if(odd_parity) begin
-               if (parity == ^data) begin
-                   pass();
-               end else begin
-                   $error($sformatf("Error in odd parity bit, data: %0b, exp_parity: %0b, parity: %0b", data, ^data, parity));
-                   fail();
-               end
-           end else begin
                if (parity == ~(^data)) begin
                    pass();
                end else begin
-                   $error($sformatf("Error in even parity bit, data: %0b, exp_parity: %0b, parity: %0b", data, ~(^data), parity));
+                   $error($sformatf("Error in odd parity bit, data: %0b, exp_parity: %0b, parity: %0b", data, ~(^data), parity));
+                   fail();
+               end
+           end else begin
+               if (parity == (^data)) begin
+                   pass();
+               end else begin
+                   $error($sformatf("Error in even parity bit, data: %0b, exp_parity: %0b, parity: %0b", data, ^data, parity));
                    fail();
                end
            end

@@ -1,6 +1,7 @@
 module shift_register#(
-    parameter bit SHIFT_LEFT     = 1'b1,
-    parameter int unsigned WIDTH = 8
+    parameter bit              SHIFT_LEFT  = 1'b1,
+    parameter int unsigned     WIDTH       = 8,
+    parameter logic[WIDTH-1:0] RST_VAL     = {WIDTH{1'b0}}
 )(
     input  logic            clk,
     input  logic            rst_n,
@@ -32,7 +33,7 @@ endgenerate
 //Register
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
-        shift_reg <= {WIDTH{1'b0}};
+        shift_reg <= RST_VAL;
     end else begin
         if (load) begin
             shift_reg <= data_in_p;

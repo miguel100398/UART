@@ -17,6 +17,7 @@ import UART_pkg::*;
 
 logic[10:0] load_shift_reg_data;
 logic parity_bit;
+logic parity_bit_stop;
 logic odd_parity;
 logic even_parity;
 
@@ -24,7 +25,8 @@ logic even_parity;
 
 shift_register#(
     .SHIFT_LEFT(1'b1),
-    .WIDTH(11)          //{start_bit,data_bits[7:0], parity_bit, stop_bit}
+    .WIDTH(11),          //{start_bit,data_bits[7:0], parity_bit, stop_bit},
+    .RST_VAL(11'b111_1111_1111)
 ) shft_reg(
     .clk(clk),
     .rst_n(rst_n),
@@ -48,30 +50,31 @@ timer#(
 );
 
 //Calculate parity bit
-assign even_parity = ~odd_parity;
+assign odd_parity = ~even_parity;
 assign parity_bit = (csr.uart_control_0_csr.odd_parity) ? odd_parity : even_parity;
+assign parity_bit_stop = (csr.uart_control_0_csr.parity_bit) ? parity_bit : UART_STOP_BIT;
 
 always_comb begin
     case (csr.uart_control_0_csr.data_bits)
         4'd5: begin
-            odd_parity          = ^tx_data[4:0];
-            load_shift_reg_data = {UART_START_BIT, tx_data[4:0], parity_bit, UART_STOP_BIT, 3'b111};
+            even_parity          = ^tx_data[4:0];
+            load_shift_reg_data = {UART_START_BIT, tx_data[4:0], parity_bit_stop, UART_STOP_BIT, 3'b111};
         end
         4'd6: begin
-            odd_parity          = ^tx_data[5:0];
-            load_shift_reg_data = {UART_START_BIT, tx_data[5:0], parity_bit, UART_STOP_BIT, 2'b11};
+            even_parity          = ^tx_data[5:0];
+            load_shift_reg_data = {UART_START_BIT, tx_data[5:0], parity_bit_stop, UART_STOP_BIT, 2'b11};
         end
         4'd7: begin
-            odd_parity          = ^tx_data[6:0];
-            load_shift_reg_data = {UART_START_BIT, tx_data[6:0], parity_bit, UART_STOP_BIT, 1'b1};
+            even_parity          = ^tx_data[6:0];
+            load_shift_reg_data = {UART_START_BIT, tx_data[6:0], parity_bit_stop, UART_STOP_BIT, 1'b1};
         end
         4'd8: begin
-            odd_parity          = ^tx_data[7:0];
-            load_shift_reg_data = {UART_START_BIT, tx_data[7:0], parity_bit, UART_STOP_BIT};
+            even_parity          = ^tx_data[7:0];
+            load_shift_reg_data = {UART_START_BIT, tx_data[7:0], parity_bit_stop, UART_STOP_BIT};
         end
         default: begin
-            odd_parity = 1'b0;
-				load_shift_reg_data = 11'd0;
+            even_parity = 1'b0;
+			load_shift_reg_data = 11'd0;
         end
     endcase
 end

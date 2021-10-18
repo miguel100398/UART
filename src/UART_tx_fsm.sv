@@ -25,11 +25,6 @@ logic all_bits_sent;       //All bits have been sent {start, data_bits, parity, 
 logic bits_sent_en;        //Increment counter of bits sent
 logic bits_sent_rst_n;    //Reset counter of bits sent  
 logic use_parity_bit;     //Parity bit will be send
-logic tx_data_ready_int;  //Assert data ready when state is idle
-
-//Assert data ready when state is IDLE or 1 clk cycle before ending the transmission of the data
-assign tx_data_ready = tx_data_ready_int || ((state==WAIT_BIT_S) && wait_bit_done && all_bits_sent);
-
 
 //FSM sequential circuit
 always_ff @(posedge clk or negedge rst_n) begin
@@ -44,17 +39,14 @@ end
 always_comb begin
     case(state)
         IDLE_S: begin
-            next_state = (send) ? START_S : IDLE_S;
-        end
-        START_S: begin
-            next_state = WAIT_BIT_S;
+            next_state = (send) ? WAIT_BIT_S : IDLE_S;
         end
         WAIT_BIT_S: begin
             if (wait_bit_done) begin
                 if (~all_bits_sent) begin
                     next_state = SHIFT_BIT_S;       //Continue sending data bits
                 end else begin
-                    next_state = (send) ? START_S : IDLE_S;
+                    next_state = IDLE_S;
                 end
             end else begin
                 next_state = WAIT_BIT_S;            //WAIT BIT
@@ -75,27 +67,17 @@ always_comb begin
         IDLE_S: begin
             bits_sent_rst_n   = 1'b0;
             bits_sent_en      = 1'b0;
-            tx_data_ready_int = 1'b1;
+            tx_data_ready     = 1'b1;
             busy              = UART_FREE;
             shift_bits        = 1'b0;
             wait_bit_en       = 1'b0;
             wait_bit_rst_n    = 1'b0;
-            start_bits        = 1'b0;
-        end
-        START_S: begin
-            bits_sent_rst_n   = 1'b0;
-            bits_sent_en      = 1'b0;
-            tx_data_ready_int = 1'b0;
-            busy              = UART_BUSY;
-            shift_bits        = 1'b0;
-            wait_bit_en       = 1'b0;
-            wait_bit_rst_n    = 1'b0;
-            start_bits        = 1'b1;
+            start_bits        = send;
         end
         WAIT_BIT_S: begin
             bits_sent_rst_n   = 1'b1;
             bits_sent_en      = 1'b0;
-            tx_data_ready_int = 1'b0;
+            tx_data_ready     = 1'b0;
             busy              = UART_BUSY;
             shift_bits        = 1'b0;
             wait_bit_en       = 1'b1;
@@ -105,7 +87,7 @@ always_comb begin
         SHIFT_BIT_S: begin
             bits_sent_rst_n   = 1'b1;
             bits_sent_en      = 1'b1;
-            tx_data_ready_int = 1'b0;
+            tx_data_ready     = 1'b0;
             busy              = UART_BUSY;
             shift_bits        = 1'b1;
             wait_bit_en       = 1'b0;
@@ -115,7 +97,7 @@ always_comb begin
         default: begin
             bits_sent_rst_n   = 1'b0;
             bits_sent_en      = 1'b0;
-            tx_data_ready_int = 1'b0;
+            tx_data_ready     = 1'b0;
             busy              = UART_BUSY;
             shift_bits        = 1'b0;
             wait_bit_en       = 1'b0;
